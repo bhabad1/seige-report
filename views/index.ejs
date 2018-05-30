@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        <%= title %>
+    </title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+
+    <script src="/javascripts/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="/javascripts/jquery.validate.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <div class="container ">
+        <h1 class="title">
+            Welcome to
+            <%= title %>
+        </h1>
+        <!-- <div class="row parent-row"> -->
+        <form class="main-container" id="apiEvaluationForm" action="#" autocomplete="off">
+            <div class="col-md-1 form-group ">
+                <label>Method</label>
+                <select class="form-control" name="methodName" id="methodName" required="required">
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                </select>
+            </div>
+            <div class="col-md-2 form-group ">
+                <label>Host</label>
+                <select class="form-control" name="hostName" id="hostName" required="required">
+                    <option value="http://192.168.1.220:3000/">http://192.168.1.220:3000/</option>
+                    <!-- <option value="http://login.kesari.in/">http://login.kesari.in/</option> -->
+                    <option value="http://192.168.1.220:5000/">http://192.168.1.220:5000/</option>
+                    <option value="http://reservations.kesari.in/">http://reservations.kesari.in/</option>
+                     <option value="http://127.0.0.1:3000/">http://localhost:3000/</option>
+                </select>
+            </div>
+            <div class="col-md-6 form-group">
+                <label>API URL</label>
+                <input type="text" name="apiRoute" id="url" class="form-control" required="required" placeholder="route/rsData/getKesariTeamMembers/630" />
+            </div>
+            <div class="col-md-1 form-group">
+                <label>Users</label>
+                <input type="number" name="concurrentUsers" id="concurrentUsers" class="form-control" value="10" />
+            </div>
+            <div class="col-md-1 form-group">
+                <label>Repetition</label>
+                <input type="number" name="repetition" id="repetition" class="form-control" value="10" />
+            </div>
+            <div class="col-md-1 form-group">
+                <label>Total</label>
+                <input type="number" name="totalRequest" id="totalRequest" class="form-control" value="100" readonly="readonly" />
+            </div>
+            <div class="col-md-12 form-group reqBody" hidden="hidden">
+                <label>Body</label>
+                <textarea class="form-control" rows="5" id="reqBody" name="reqBody" placeholder="Please Enter Valid JSON "></textarea>
+                <!-- <input type="number" name="totalRequest" id="totalRequest" class="form-control" value="1000" readonly="readonly" /> -->
+            </div>
+            <div class="clearfix"></div>
+            <div class="row">
+                <div class="col-md-12">
+                    <button class="btn btn-secondary btn-guest evaluateApi">Evaluate API Performance</button>
+                </div>
+            </div>
+        </form>
+        <div class="clearfix reportDiv"></div>
+        <div class="loader loader-1" id="Loader" hidden="hidden"></div>
+        <div class="row">
+            <div class="col-md-12 apiPerformanceReport">
+                <textarea class="form-control" rows="20" id="apiPerformanceReport" name="apiPerformanceReport"></textarea>
+            </div>
+        </div>
+        <!-- </div> -->
+    </div>
+</body>
+<script>
+    $(document).ready(function(e) {
+        $("#concurrentUsers,#repetition").on('keyup', function(params) {
+            var concurrentUsers = $("#concurrentUsers").val();
+            var repetition = $("#repetition").val();
+            var total = parseInt(concurrentUsers) * parseInt(repetition);
+            $("#totalRequest").val(total);
+
+        });
+
+        $("#methodName").on('change', function(param) {
+            var methodName = $(this).find('option:selected').val();
+            if (methodName === "POST") {
+                $('.reqBody').removeAttr('hidden');
+            } else {
+                $('.reqBody').attr('hidden', 'hidden')
+            }
+        });
+
+        $("#apiEvaluationForm").validate({
+            rules: {
+                methodName: {
+                    required: true
+                },
+                url: {
+                    required: true
+                }
+            },
+            errorPlacement: function(error, element) {
+
+            },
+            submitHandler: function(form) {
+                $("#Loader").show();
+                $("#apiPerformanceReport").val("Loading....");
+                $(".evaluateApi").attr('disabled', 'disabled');
+                var $form = $(form);
+                var formData = $form.serializeArray();
+
+                $.ajax({
+                    url: "/evaluateApi",
+                    type: "POST",
+                    data: JSON.stringify(formData),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function(result) {
+                        $(".evaluateApi").removeAttr('disabled')
+                        $("#apiPerformanceReport").val(result)
+                        $("#Loader").hide();
+
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $("#Loader").hide();
+                        $(".evaluateApi").removeAttr('disabled')
+                        console.log(errorThrown)
+                        $("#apiPerformanceReport").val(errorThrown)
+                    }
+                });
+
+            }
+        });
+
+    });
+</script>
+
+</html>
