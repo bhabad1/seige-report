@@ -18,10 +18,10 @@ const server = app.listen(app.get('port'), () => {
 let mongoConnectUrl;
 
 if (app.get('env') === 'production') {
-    mongoConnectUrl = `mongodb://kesari:${encodeURIComponent('kesari123')}@192.168.1.241:27020/ERP?connectTimeoutMS=300000`;
+    mongoConnectUrl = `mongodb://abcd:${encodeURIComponent('abcd123')}@192.168.1.241:27020/Test?connectTimeoutMS=300000`;
     // mongoConnectUrl = 'mongodb://kesari:kesari123@192.168.1.241:27020,192.168.1.242:27020,192.168.1.243:27020/ERP/?replicaSet=rs0&connectTimeoutMS=300000';
 } else {
-    mongoConnectUrl = `mongodb://devadmin:${encodeURIComponent('mongo123')}@192.168.1.213:27018/ERP1?connectTimeoutMS=300000`;
+    mongoConnectUrl = `mongodb://abcd:${encodeURIComponent('abcd')}@192.168.1.213:27018/test?connectTimeoutMS=300000`;
 
     //mongoConnectUrl = 'mongodb://devadmin:mongo123@192.168.1.213:27018/ERP1';
 }
